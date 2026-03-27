@@ -1,0 +1,20 @@
+{
+  "project": "AI Review Intelligence",
+  "contributors": [
+    {
+      "name": "Ashish Santikari",
+      "role": "Project Lead",
+      "contribution": "Concept, architecture direction, and end-to-end product guidance."
+    },
+    {
+      "name": "Engineering Team",
+      "role": "Full-Stack Development",
+      "contribution": "Implemented Streamlit UX, FastAPI contracts, model lifecycle, and Docker integration."
+    },
+    {
+      "name": "Instructor",
+      "role": "Mentor",
+      "contribution": "Provided technical mentorship, review standards, and iterative feedback."
+    }
+  ]
+}
