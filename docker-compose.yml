@@ -1,0 +1,31 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ml-api
+    environment:
+      MODEL_ROOT: /models
+      MODEL_IDLE_SECONDS: 180
+      MODEL_MANAGER_VERBOSE: "true"
+      CSRF_TTL_SECONDS: 600
+      BLOG_RATE_LIMIT_MAX: 5
+      BLOG_RATE_LIMIT_WINDOW_SECONDS: 3600
+      OPENAI_MODEL: gpt-4.1-mini
+      # OPENAI_API_KEY: set from env or .env file
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/models
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ml-ui
+    environment:
+      API_BASE_URL: http://backend:8000
+    depends_on:
+      - backend
+    ports:
+      - "8501:8501"
