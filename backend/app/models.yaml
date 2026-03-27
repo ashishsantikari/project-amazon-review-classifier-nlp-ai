@@ -1,0 +1,28 @@
+models:
+  ashish:
+    type: lora
+    name: ashish_lora_csv_20260327_151727
+    keyword: ashish
+    env_var: SENTIMENT_MODEL_DIR
+    fallback_name: facebookai/roberta-base-sentiment-ashish-lora
+    task: sentiment
+  jesus:
+    type: full
+    name: jesus_roberta-base_sentiment_FINAL_20260327_1647
+    keyword: jesus
+    env_var: JESUS_MODEL_DIR
+    fallback_name: facebookai/roberta-base-sentiment-jesus-lora
+    task: sentiment
+  roberta_reference:
+    type: hub
+    hub_id: cardiffnlp/twitter-roberta-base-sentiment-latest
+    env_var: REFERENCE_SENTIMENT_MODEL_ID
+    fallback_name: roberta_reference_model
+    task: sentiment
+  category:
+    type: pipeline
+    name: category-transformer-v1
+    keyword: category
+    env_var: CATEGORY_MODEL_DIR
+    fallback_name: category-heuristic-v1
+    task: category
