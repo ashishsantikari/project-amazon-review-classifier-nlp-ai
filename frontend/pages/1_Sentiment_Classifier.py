@@ -1,84 +1,84 @@
-import os
-import requests
+import sys
+from pathlib import Path
 import streamlit as st
 
-API_BASE_URL = os.getenv("API_BASE_URL", "http://localhost:8000")
+st.set_page_config(page_title="Sentiment Classifier", page_icon="🎭", layout="centered", initial_sidebar_state="expanded")
 
-st.set_page_config(page_title="Sentiment Classifier", page_icon="🧾", layout="centered")
-st.title("Sentiment Classifier")
-st.write("Paste a product review from Amazon, Yelp, Google, or any source.")
+# Logic Imports
+sys.path.append(str(Path(__file__).resolve().parent.parent))
+from logic.model_manager import ModelManager
+from logic.styles import apply_shared_styles, navigation_footer, apply_aura_animation
 
-with st.expander("How to copy a clean review"):
-    st.markdown(
-        """
-        1. Select only the review text, not star icons.
-        2. Remove usernames or URLs if possible.
-        3. Keep at least one full sentence for better predictions.
-        """
-    )
+# --- CONFIG & INITIALIZATION ---
+def get_project_root() -> Path:
+    return Path(__file__).resolve().parent.parent.parent
 
-review_text = st.text_area("Review Text", height=180, placeholder="Paste review here...")
+@st.cache_resource
+def get_model_manager():
+    root = get_project_root() / "models"
+    return ModelManager(model_root=str(root))
 
-@st.cache_data(ttl=60)
-def get_sentiment_models():
+model_manager = get_model_manager()
+
+apply_shared_styles()
+
+@st.cache_data(ttl=600)
+def get_available_models():
     try:
-        resp = requests.get(f"{API_BASE_URL}/models", timeout=5)
-        if resp.status_code == 200:
-            models_config = resp.json()
-            return {k: v.get("fallback_name", k) for k, v in models_config.items() if v.get("task") == "sentiment"}
-    except requests.RequestException:
-        pass
-    return {"ashish": "facebookai/roberta-base-sentiment-ashish-lora", "roberta_reference": "roberta_reference_model"}
+        models = model_manager.models_config
+        return [k for k, v in models.items() if v.get("task") == "sentiment"]
+    except Exception as e:
+        st.error(f"Error loading models: {e}")
+        return ["ashish", "jesus", "roberta_reference"]
 
-sentiment_models = get_sentiment_models()
+available_models = get_available_models()
 
-model_option = st.selectbox(
-    "Sentiment Model",
-    options=list(sentiment_models.keys()),
-    format_func=lambda x: sentiment_models[x],
-    index=0,
+st.title("🎭 Sentiment Classifier")
+st.write("Extract emotional intelligence from text using advanced transformer models.")
+
+# --- INPUT SECTION ---
+review_text = st.text_area("Analyze Review", value=st.session_state.get("shared_review_text", ""), height=150, placeholder="Paste your product review here...")
+st.session_state["shared_review_text"] = review_text
+
+st.markdown("### 🛠️ Configuration")
+selected_models = st.multiselect(
+    "Models to Compare",
+    options=available_models,
+    default=["ashish"]
 )
 
-if st.button("Predict Sentiment", type="primary", use_container_width=True):
+if st.button("🚀 EXECUTE CLASSIFICATION", type="primary", use_container_width=True):
     if not review_text.strip():
-        st.warning("Please provide review text.")
+        st.warning("Please enter a review.")
+    elif not selected_models:
+        st.warning("Please select at least one sentiment model.")
     else:
-        try:
-            with st.spinner("Analyzing sentiment..."):
-                response = requests.post(
-                    f"{API_BASE_URL}/predict/sentiment",
-                    json={"text": review_text, "sentiment_model": model_option},
-                    timeout=30,
-                )
-                response.raise_for_status()
-                data = response.json()
-
-            st.success("✨ Prediction Complete")
-            
-            # Format the sentiment with an emoji
-            raw_sentiment = data.get("sentiment", "unknown").lower()
-            sentiment_emoji = {"positive": "😊", "neutral": "😐", "negative": "😠"}.get(raw_sentiment, "🔍")
-            display_sentiment = f"{sentiment_emoji} {raw_sentiment.title()}"
-            
-            # Display metrics side-by-side
-            col1, col2 = st.columns(2)
-            with col1:
-                st.metric("Sentiment", display_sentiment)
-            with col2:
-                st.metric("Confidence", f"{data.get('confidence', 0):.1%}")
+        apply_aura_animation()
+        with st.status("🌌 Extracting Emotional Intelligence...", expanded=True) as status:
+            try:
+                sent_results = []
+                for m in selected_models:
+                    sentiment, confidence, m_name = model_manager.sentiment_predict(review_text, model_option=m)
+                    sent_results.append({"sentiment": sentiment, "confidence": confidence, "model": m_name})
                 
-            with st.expander("Model Details", expanded=False):
-                st.caption(f"**Loaded Model**: `{data.get('model', 'unknown')}`")
-                st.caption(f"**Requested Option**: `{model_option}`")
+                st.session_state["sentiment_results"] = sent_results
+                status.update(label="Classification Complete", state="complete")
+            except RuntimeError as e:
+                status.update(label="Classification Failed", state="error")
+                st.error(f"**Model Error**: {e}")
+            except Exception as e:
+                status.update(label="Critical System Error", state="error")
+                st.error(f"**Unexpected Error**: {e}")
 
-            st.session_state["last_review_text"] = review_text
-            st.session_state["last_sentiment"] = raw_sentiment
+# --- RESULTS ---
+if "sentiment_results" in st.session_state:
+    st.markdown("## 📊 Results")
+    cols = st.columns(len(st.session_state["sentiment_results"]))
+    for idx, s in enumerate(st.session_state["sentiment_results"]):
+        with cols[idx]:
+            st.metric(s["model"].upper(), s["sentiment"].upper(), f"{s['confidence']:.1%}")
 
-            st.markdown("---")
-            st.write("### Ready for more insights?")
-            st.write("Now that we know the sentiment, let's see what category this fits into.")
-            if st.button("Go To Category Classifier"):
-                st.switch_page("pages/2_Category_Classifier.py")
+    st.markdown("---")
+    st.page_link("pages/2_Category_Classifier.py", label="Switch to Category Classifier", icon="🎲", use_container_width=True)
 
-        except requests.RequestException as exc:
-            st.error(f"API call failed: {exc}")
+navigation_footer()

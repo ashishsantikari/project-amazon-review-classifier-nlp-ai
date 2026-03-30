@@ -116,7 +116,7 @@ class ModelManager:
             from transformers import AutoTokenizer
         except Exception as exc:
             self.logger.exception("Failed importing peft/transformers/torch: %s", exc)
-            return None
+            return {"error": f"ImportError: {str(exc)}"}
 
         if not adapter_dir.exists():
             self.logger.warning("LoRA adapter directory not found: %s", str(adapter_dir))
@@ -151,7 +151,7 @@ class ModelManager:
             }
         except Exception as exc:
             self.logger.exception("Failed loading LoRA sentiment bundle from %s: %s", str(adapter_dir), exc)
-            return None
+            return {"error": f"LoadError: {str(exc)}"}
 
     def _load_local_sentiment_full(self, model_dir_path: Path) -> Any:
         self._vdebug("Loading full sentiment bundle | model_dir=%s", str(model_dir_path))
@@ -309,8 +309,11 @@ class ModelManager:
                     self._model_names[cache_key] = model_dir.name if model_dir is not None else cfg.get("fallback_name", "unknown")
                 else:
                     self.logger.error("Unknown model type '%s' for option '%s'", model_type, model_option)
-                    return None
+                    model = {"error": f"Unknown model type '{model_type}'"}
 
+                if isinstance(model, dict) and "error" in model:
+                    self.logger.error("Model load failed | option=%s error=%s", model_option, model["error"])
+                
                 self._loaded[cache_key] = model
                 self.logger.info(
                     "Sentiment model loaded | option=%s model_name=%s loaded=%s",
@@ -373,7 +376,12 @@ class ModelManager:
                 model_option,
                 self._model_names.get(cache_key, "unknown"),
             )
-            raise RuntimeError(f"Sentiment model '{model_option}' is not available.")
+            raise RuntimeError(f"Sentiment model '{model_option}' is not available in configuration.")
+
+        if isinstance(model, dict) and "error" in model:
+            err = model["error"]
+            self.logger.error("Sentiment model load error | option=%s error=%s", model_option, err)
+            raise RuntimeError(f"Sentiment model '{model_option}' failed to load: {err}")
 
         model_name = self._model_names.get(cache_key, cfg.get("fallback_name", "unknown"))
         model_type = cfg.get("type")

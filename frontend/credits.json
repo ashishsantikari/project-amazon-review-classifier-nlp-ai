@@ -3,17 +3,27 @@
   "contributors": [
     {
       "name": "Ashish Santikari",
-      "role": "Project Lead",
+      "role": "Software Engineer",
       "contribution": "Concept, architecture direction, and end-to-end product guidance."
     },
     {
-      "name": "Engineering Team",
-      "role": "Full-Stack Development",
+      "name": "Jesus",
+      "role": "Data Scientist",
       "contribution": "Implemented Streamlit UX, FastAPI contracts, model lifecycle, and Docker integration."
     },
     {
-      "name": "Instructor",
-      "role": "Mentor",
+      "name": "Daniel Hütte",
+      "role": "Visionary Leader",
+      "contribution": "Provided technical mentorship, review standards, and iterative feedback."
+    },
+    {
+      "name": "Nadya",
+      "role": "Visionary Leader",
+      "contribution": "Provided technical mentorship, review standards, and iterative feedback."
+    },
+    {
+      "name": "Al-Hussein",
+      "role": "Visionary Leader",
       "contribution": "Provided technical mentorship, review standards, and iterative feedback."
     }
   ]
