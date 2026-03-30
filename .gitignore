@@ -7,3 +7,4 @@ frontend/.env
 backend/app/__pycache__/*
 backend/__pycache__/
 models/*
+models/**/*.pyc
