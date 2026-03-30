@@ -4,7 +4,8 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: ml-unified-intelligence
-    # Corrected to use env_file instead of manual volume mount for credentials
+    restart: unless-stopped
+    # Integrated credential loading via env_file
     env_file:
       - ./frontend/.env
     environment:
