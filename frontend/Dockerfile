@@ -20,7 +20,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY pyproject.toml uv.lock /app/
 
 # Synchronize dependencies with build caching
-RUN uv sync --frozen --no-dev --no-install-project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --no-install-project
 
 # --- RUNTIME STAGE ---
 FROM python:3.12-slim
@@ -40,8 +41,13 @@ ENV STREAMLIT_SERVER_ADDRESS=0.0.0.0
 WORKDIR /app
 
 # Create a non-root user for security
-RUN groupadd -r streamlit && useradd -r -g streamlit streamlit \
+RUN groupadd -r streamlit && useradd -m -r -g streamlit streamlit \
+    && mkdir -p /app/.cache \
     && chown -R streamlit:streamlit /app
+
+# Set specialized cache paths for transformers/huggingface
+ENV HF_HOME=/app/.cache
+ENV TRANSFORMERS_CACHE=/app/.cache
 
 # Copy the pre-installed virtual environment from builder
 COPY --from=builder --chown=streamlit:streamlit /app/.venv /app/.venv
