@@ -50,7 +50,10 @@ class ModelManager:
         self._lock = Lock()
         self.verbose = os.getenv("MODEL_MANAGER_VERBOSE", "false").lower() in {"1", "true", "yes", "on"}
 
-        yaml_path = Path(__file__).parent / "models.yaml"
+        yaml_path = self.model_root / "models.yaml"
+        if not yaml_path.exists():
+            yaml_path = Path(__file__).parent / "models.yaml"
+
         if yaml_path.exists():
             with open(yaml_path, "r") as f:
                 self.models_config = yaml.safe_load(f).get("models", {})
