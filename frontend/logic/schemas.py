@@ -8,7 +8,7 @@ class PredictRequest(BaseModel):
 
 class SentimentPredictRequest(BaseModel):
     text: str = Field(..., min_length=3, max_length=5000)
-    sentiment_model: Literal["ashish", "roberta_reference", "jesus"] = "ashish"
+    sentiment_model: Literal["lora_finetuned", "roberta_finetuned", "roberta_reference"] = "lora_finetuned"
 
 
 class SentimentResponse(BaseModel):

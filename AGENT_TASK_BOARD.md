@@ -26,7 +26,6 @@ Status: Done
 - Built sentiment flow page with user guidance
 - Built category flow page with rolling dice animation component
 - Built blog generation page with secure form flow and cooldown
-- Built JSON-driven credits page
 
 ## Agent: Docker Specialist
 Status: Done

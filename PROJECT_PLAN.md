@@ -6,7 +6,6 @@ Build a monorepo app with Streamlit frontend and FastAPI backend supporting:
 - Sentiment classifier
 - Category classifier
 - Blog post generation
-- JSON-driven credits page
 
 ## Architecture
 - Frontend: Streamlit multipage app
@@ -97,5 +96,4 @@ Response:
 - Category prediction works with dice animation.
 - Blog post generation works with CSRF token.
 - Rate limiting blocks excessive blog requests.
-- Credits page renders from JSON.
 - Idle models are unloaded after 3 minutes.

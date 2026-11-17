@@ -1,17 +1,17 @@
 models:
-  ashish:
+  lora_finetuned:
     type: lora
-    name: ashish_lora_csv_20260327_151727
-    keyword: ashish
-    env_var: SENTIMENT_MODEL_DIR
-    fallback_name: facebookai/roberta-base-sentiment-ashish-lora
+    name: sentiment-lora
+    keyword: sentiment-lora
+    env_var: LORA_SENTIMENT_MODEL_DIR
+    fallback_name: roberta-base-sentiment-lora
     task: sentiment
-  jesus:
+  roberta_finetuned:
     type: full
-    name: jesus_roberta-base_sentiment_FINAL_20260327_1647
-    keyword: jesus
-    env_var: JESUS_MODEL_DIR
-    fallback_name: facebookai/roberta-base-sentiment-jesus-lora
+    name: roberta-base-sentiment-finetuned
+    keyword: roberta-base-sentiment-finetuned
+    env_var: ROBERTA_SENTIMENT_MODEL_DIR
+    fallback_name: roberta-base-sentiment-finetuned
     task: sentiment
   roberta_reference:
     type: hub
