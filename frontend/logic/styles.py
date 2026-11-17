@@ -19,6 +19,17 @@ def apply_shared_styles():
         -webkit-text-fill-color: transparent;
         font-weight: 800;
     }
+    /* Inline code inside gradient headings: the heading's transparent text fill
+       is inherited by <code>, and background-clip:text does not reach it, so
+       the text would be invisible on a dark box. Give it its own solid colour. */
+    h1 code, h2 code, h3 code {
+        -webkit-text-fill-color: #e9d5ff;
+        color: #e9d5ff;
+        background: rgba(139, 92, 246, 0.25);
+        border: 1px solid rgba(192, 132, 252, 0.4);
+        border-radius: 8px;
+        padding: 0.1em 0.45em;
+    }
     .stButton>button {
         background: linear-gradient(to right, #3b82f6, #8b5cf6);
         color: white; border: none; border-radius: 12px; font-weight: 600; transition: 0.3s;
@@ -66,4 +77,3 @@ def navigation_footer():
     st.divider()
     c1, c2, c3 = st.columns([1,1,1])
     with c1: st.page_link("Home.py", label="⬅️ BACK: HOME", icon="🏠")
-    with c3: st.page_link("pages/4_Credits.py", label="🛡️ CREDITS", icon="🙏")
