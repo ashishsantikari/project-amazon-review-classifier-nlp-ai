@@ -18,7 +18,6 @@
 - [x] Build sentiment page with copy-review guide
 - [x] Build category page with rolling dice animation
 - [x] Build blog page with secure form submission
-- [x] Build JSON-driven credits page
 
 ## Validation
 - [ ] Run app locally with Docker Compose

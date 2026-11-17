@@ -82,6 +82,5 @@ with c3:
     st.caption("Live market search & blog synthesis.")
 
 st.markdown("---")
-f1, f2 = st.columns([1, 1])
-with f2: st.page_link("pages/4_Credits.py", label="🛡️ View Credits", icon="🙏")
-with f1: st.caption("Intelligence Orchestrated with Streamlit | PyTorch | LangChain")
+
+st.caption("Intelligence Orchestrated with Streamlit | PyTorch | LangChain")

@@ -29,7 +29,7 @@ def get_available_models():
         return [k for k, v in models.items() if v.get("task") == "sentiment"]
     except Exception as e:
         st.error(f"Error loading models: {e}")
-        return ["ashish", "jesus", "roberta_reference"]
+        return ["lora_finetuned", "roberta_finetuned", "roberta_reference"]
 
 available_models = get_available_models()
 
@@ -44,7 +44,7 @@ st.markdown("### 🛠️ Configuration")
 selected_models = st.multiselect(
     "Models to Compare",
     options=available_models,
-    default=["ashish"]
+    default=[m for m in ["lora_finetuned"] if m in available_models]
 )
 
 if st.button("🚀 EXECUTE CLASSIFICATION", type="primary", use_container_width=True):
