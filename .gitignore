@@ -9,3 +9,10 @@ backend/app/__pycache__/*
 backend/__pycache__/
 models/**/*.pyc
 
+training/.venv
+training/data/
+training/checkpoints/
+training/train.log
+
+# Model weights live on the Hugging Face Hub, not in git
+models/*/

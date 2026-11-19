@@ -1,0 +1,25 @@
+{
+  "base_model": "distilroberta-base",
+  "test_accuracy": 0.8234,
+  "test_f1_macro": 0.8232,
+  "n_train": 56000,
+  "n_val": 7000,
+  "n_test": 7000,
+  "epochs": 3,
+  "learning_rate": 3e-05,
+  "max_length": 128,
+  "train_minutes": 7.3,
+  "device": "NVIDIA GeForce RTX 5060 Laptop GPU",
+  "labels": [
+    "automotive",
+    "beauty",
+    "books",
+    "electronics",
+    "fashion",
+    "grocery",
+    "home & kitchen",
+    "pet supplies",
+    "sports & outdoors",
+    "toys & games"
+  ]
+}

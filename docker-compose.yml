@@ -5,9 +5,10 @@ services:
       dockerfile: Dockerfile
     container_name: ml-unified-intelligence
     restart: unless-stopped
-    # Integrated credential loading via env_file
+    # Optional: the app starts without it; only Research Post needs OPENAI_API_KEY
     env_file:
-      - ./frontend/.env
+      - path: ./frontend/.env
+        required: false
     environment:
       - MODEL_ROOT=/models
       - MODEL_IDLE_SECONDS=180
@@ -20,3 +21,8 @@ services:
     volumes:
       # Persistent volume for local transformer models and adapters
       - ./models:/models
+      # Hugging Face downloads survive container re-creation
+      - hf-cache:/app/.cache
+
+volumes:
+  hf-cache:
