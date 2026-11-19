@@ -1,0 +1,28 @@
+[project]
+name = "category-training"
+version = "0.1.0"
+description = "Fine-tune a product-category classifier on Amazon Reviews 2023"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "torch>=2.7.0",
+    "transformers==4.47.1", # same version as the app, so the saved config loads 1:1
+    "accelerate>=1.0.0",
+    "datasets>=3.0.0",
+    "scikit-learn>=1.5",
+    "matplotlib>=3.9",
+    "pandas>=2.2",
+    "requests>=2.32",
+    "huggingface_hub>=0.26",
+]
+
+# CUDA 12.8 wheels: required for RTX 50-series (Blackwell, sm_120) GPUs.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cu128" }]
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv]
+package = false

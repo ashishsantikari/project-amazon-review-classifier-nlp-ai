@@ -47,6 +47,7 @@ class ModelManager:
         self._loaded: dict[str, Any] = {}
         self._last_used: dict[str, float] = {}
         self._model_names: dict[str, str] = {}
+        self._hub_ids: dict[str, str] = {}
         self._lock = Lock()
         self.verbose = os.getenv("MODEL_MANAGER_VERBOSE", "false").lower() in {"1", "true", "yes", "on"}
 
@@ -112,6 +113,8 @@ class ModelManager:
         loaded from the same final_model/ directory.
         """
         adapter_dir = model_dir_path / "final_model"
+        if not adapter_dir.exists() and (model_dir_path / "adapter_config.json").exists():
+            adapter_dir = model_dir_path
         self._vdebug("Loading LoRA sentiment bundle | adapter_dir=%s", str(adapter_dir))
         try:
             import torch
@@ -222,7 +225,26 @@ class ModelManager:
         self._vdebug("Discovered %s candidate model directories under %s", len(out), str(self.model_root))
         return out
 
-    def _resolve_model_dir(self, env_var: str, keyword: str) -> Path | None:
+    def _display_name(self, model_dir: Path) -> str:
+        return self._hub_ids.get(str(model_dir), model_dir.name)
+
+    def _download_from_hub(self, hub_id: str) -> Path | None:
+        """Download a model repo from the Hugging Face Hub (cached under HF_HOME)."""
+        try:
+            from huggingface_hub import snapshot_download
+        except Exception as exc:
+            self.logger.exception("huggingface_hub not available: %s", exc)
+            return None
+        try:
+            self.logger.info("Local model not found; downloading from Hugging Face Hub | repo=%s", hub_id)
+            path = Path(snapshot_download(repo_id=hub_id))
+            self._hub_ids[str(path)] = hub_id
+            return path
+        except Exception as exc:
+            self.logger.exception("Failed downloading %s from the Hub: %s", hub_id, exc)
+            return None
+
+    def _resolve_model_dir(self, env_var: str, keyword: str, hub_id: str | None = None) -> Path | None:
         configured = os.getenv(env_var)
         if configured:
             candidate = self.model_root / configured
@@ -260,6 +282,8 @@ class ModelManager:
                 )
 
         if not matches:
+            if hub_id:
+                return self._download_from_hub(hub_id)
             self.logger.warning("No model directory matches keyword '%s' under %s", keyword, str(self.model_root))
             return None
 
@@ -304,12 +328,12 @@ class ModelManager:
                     )
                     self._model_names[cache_key] = model_name if model is not None else cfg.get("fallback_name", "unknown")
                 elif model_type in ("full", "lora"):
-                    model_dir = self._resolve_model_dir(cfg.get("env_var", ""), cfg.get("keyword", ""))
+                    model_dir = self._resolve_model_dir(cfg.get("env_var", ""), cfg.get("keyword", ""), cfg.get("hub_id"))
                     if model_type == "full":
                         model = self._load_local_sentiment_full(model_dir) if model_dir is not None else None
                     else:
                         model = self._load_local_sentiment_bundle(model_dir) if model_dir is not None else None
-                    self._model_names[cache_key] = model_dir.name if model_dir is not None else cfg.get("fallback_name", "unknown")
+                    self._model_names[cache_key] = self._display_name(model_dir) if model_dir is not None else cfg.get("fallback_name", "unknown")
                 else:
                     self.logger.error("Unknown model type '%s' for option '%s'", model_type, model_option)
                     model = {"error": f"Unknown model type '{model_type}'"}
@@ -335,13 +359,15 @@ class ModelManager:
             if model is None:
                 self._vdebug("Category model cache miss")
                 cfg = self.models_config.get("category", {})
-                model_dir = self._resolve_model_dir(cfg.get("env_var", "CATEGORY_MODEL_DIR"), cfg.get("keyword", "category"))
+                model_dir = self._resolve_model_dir(
+                    cfg.get("env_var", "CATEGORY_MODEL_DIR"), cfg.get("keyword", "category"), cfg.get("hub_id")
+                )
                 model = self._load_transformer_pipeline(
                     task_name="text-classification",
                     model_dir_path=model_dir,
                 ) if model_dir is not None else None
                 self._loaded["category"] = model
-                self._model_names["category"] = model_dir.name if model_dir is not None else cfg.get("fallback_name", "category-heuristic-v1")
+                self._model_names["category"] = self._display_name(model_dir) if model_dir is not None else cfg.get("fallback_name", "category-heuristic-v1")
                 self.logger.info(
                     "Category model loaded | model_name=%s loaded=%s",
                     self._model_names.get("category", "unknown"),

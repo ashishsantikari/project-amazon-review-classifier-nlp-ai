@@ -1,9 +1,12 @@
+# Local folders in models/ are used first; otherwise the model is downloaded
+# from the Hugging Face Hub (hub_id) on first use.
 models:
   lora_finetuned:
     type: lora
     name: sentiment-lora
     keyword: sentiment-lora
     env_var: LORA_SENTIMENT_MODEL_DIR
+    hub_id: jramduran/review-sentiment-roberta-lora
     fallback_name: roberta-base-sentiment-lora
     task: sentiment
   roberta_finetuned:
@@ -11,6 +14,7 @@ models:
     name: roberta-base-sentiment-finetuned
     keyword: roberta-base-sentiment-finetuned
     env_var: ROBERTA_SENTIMENT_MODEL_DIR
+    hub_id: jramduran/review-sentiment-roberta-base
     fallback_name: roberta-base-sentiment-finetuned
     task: sentiment
   roberta_reference:
@@ -21,8 +25,9 @@ models:
     task: sentiment
   category:
     type: pipeline
-    name: category-transformer-v1
+    name: category-distilroberta
     keyword: category
     env_var: CATEGORY_MODEL_DIR
+    hub_id: jramduran/review-category-distilroberta
     fallback_name: category-heuristic-v1
     task: category
